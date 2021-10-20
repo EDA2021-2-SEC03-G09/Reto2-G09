@@ -75,5 +75,17 @@ def getAuthorsByYear(catalog, syear, eyear):
     Retorna los libros que fueron publicados
     en un año
     """
-    books = model.getAuthorsByYear(catalog, syear, eyear)
-    return books
+    authors = model.getAuthorsByYear(catalog, syear, eyear)
+    return authors
+
+def getArtworkByYear(catalog, syear, eyear):
+    artworks = model.getArtworkByYear(catalog, syear, eyear)
+    return artworks
+
+def ArtworkstechByAuthor(catalog, authorname):
+    artworkstech = model.addTechniqueReps(catalog, authorname)
+    return artworkstech
+
+def addNationalityReps(catalog):
+    nationalities = model.addNationalityReps(catalog)
+    return nationalities

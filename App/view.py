@@ -29,6 +29,8 @@ import sys
 import controller
 from DISClib.ADT import list as lt
 assert cf
+from DISClib.ADT import map as mp
+from DISClib.DataStructures import mapentry as me
 
 sys.setrecursionlimit(5000)
 
@@ -55,10 +57,10 @@ def printAuthorbyYear(authors):
         tamano = 0
         primeros = 0
         ultimos = 0
-        authors_1 = authors
-        authors_2 = authors
+        authors_1 = lt.getElement(authors, 0)
+        authors_2 = lt.getElement(authors, lt.size(authors))
         for i in range(0, lt.size(authors)):
-            tamano += (lt.size(lt.firstElement(authors_1)))
+            tamano += (lt.size(lt.firstElement(authors)))
             while primeros < 3:
                 print(lt.firstElement(authors_1))
                 lt.removeFirst(authors_1)
@@ -71,11 +73,112 @@ def printAuthorbyYear(authors):
     else:
         print("No se encontraron autores.\n")
 
+def printArtworksbyYear(artworks):
+
+    if(artworks):
+        tamano = 0
+        primeros = 0
+        ultimos = 0
+        artworks_1 = artworks
+        artworks_2 = artworks
+        for i in range(0, lt.size(artworks)):
+            tamano += (lt.size(lt.firstElement(artworks_1)))
+            while primeros < 3:
+                print(lt.firstElement(artworks_1))
+                lt.removeFirst(artworks_1)
+                primeros += 1
+            while ultimos < 3:
+                print(lt.lastElement(artworks_2))
+                lt.removeLast(artworks_2)
+                ultimos += 1
+        print("Se encontraron " + str(tamano) + " autores")
+    else:
+        print("No se encontraron autores.\n")
+
+
+def printArtworkstech(catalog, ord_obras):
+    tamano = 0
+    list_max = lt.newList()
+    techniques = catalog["techniques"]
+    max = 0
+    valores = mp.valueSet(techniques)
+    x = lt.size(valores)
+    for i in range(1,x+1):
+        valor = lt.size(lt.getElement(valores, i))
+        tamano += valor
+        if valor > max:
+            max = valor
+    x = lt.size(ord_obras)
+    for i in range(1, x+1):
+        entry = lt.getElement(ord_obras, i)
+        llave = me.getKey(entry)
+        valor = me.getValue(entry)
+        y = lt.size(valor)
+        for j in range(1, y+1):
+            if llave == max:
+                entry = lt.getElement(valor, j)
+                lt.addLast(list_max, entry)
+    print("\n")
+    print("Total de obras encontradas: " + str(tamano) + "\n")
+    print("Técnica más utilizada: " + (lt.firstElement(list_max))["Medium"] + " con " + str(lt.size(list_max)) + " obras")
+    primeros = 0
+    while primeros < max:
+        print("-"*100)
+        print(lt.firstElement(list_max))
+        print("-"*100)
+        lt.removeFirst(list_max)
+        primeros += 1
+    
+def printMostNationalities(catalog, listNations):
+    nationalities = listNations
+
+    llaves = mp.keySet(nationalities)
+    values_size = lt.size(llaves)
+    top = 0
+    topnations = lt.newList()
+    max = 0
+    max = 0
+    for i in range(1, values_size+1):
+        exists = mp.contains(nationalities, lt.getElement(llaves, i))
+        if exists:
+            pareja = mp.get(nationalities, lt.getElement(llaves, i))
+            llave = me.getKey(pareja)
+            actual = me.getValue(pareja)
+            if actual > max:
+                max = actual
+                
+    values = mp.valueSet(nationalities)
+    for j in range(1, values_size):
+        print(lt.size(values))
+        if lt.getElement(values, j) == max:
+            
+            nation = lt.getElement(llaves, j)
+            entry = me.setValue(pareja, max)
+            entry = me.setKey(entry, nation)
+            lt.addLast(topnations, entry)
+            mp.remove(nationalities, nation)
+    print(topnations)
+    
+
+    return topnations
+    
+            
+                
+        
+    
+
+    
+
+
+
+
 def printMenu():
     print("Bienvenido")
     print("0- Inicializar catálogo")
     print("1- Cargar información en el catálogo")
-    print("2- Buscar obras en un rango de fechas")
+    print("2- Buscar autores en un rango de fechas")
+    print("3- Buscar obras adquiridas en un rango de fechas")
+    print("4- Buscar tecnicas de un autor")
 
 def initCatalog():
     return controller.initCatalog
@@ -101,14 +204,30 @@ while True:
         controller.loadData(cont)
         print('Obras cargadas: ' + str(controller.artworksSize(cont)))
         print('Autores cargados: ' + str(controller.authorsSize(cont)))
-        print(cont["authors"])
+       
 
-    
     elif int(inputs[0]) == 2:
         syear = input("Que fecha de inicio: ")
         eyear = input("Que fecha de finalización: ")
         authors = controller.getAuthorsByYear(cont, int(syear), int(eyear))
         printAuthorbyYear(authors)
+    
+    elif int(inputs[0]) == 3:
+        syear = input("Que fecha de inicio1: ")
+        eyear = input("Que fecha de finalización1: ")
+        artworks = controller.getArtworkByYear(cont, (syear), (eyear))
+    
+
+    elif int(inputs[0]) == 4:
+        authorname = input("Nombre de autor a buscar: ")
+        artworks = controller.ArtworkstechByAuthor(cont, authorname)
+        printArtworkstech(cont, artworks)
+
+    elif int(inputs[0]) == 5:
+        artworks = controller.addNationalityReps(cont)
+        print(printMostNationalities(cont, artworks))
+
+        
     else:
         sys.exit(0)
 sys.exit(0)

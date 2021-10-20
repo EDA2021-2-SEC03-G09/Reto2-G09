@@ -25,11 +25,14 @@
  """
 
 
+from DISClib.DataStructures.arraylist import compareElements
 import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
+from datetime import datetime
+from datetime import timedelta
 assert cf
 
 """
@@ -53,10 +56,15 @@ def newCatalog():
                                         maptype="CHAINING",
                                         loadfactor=4.0)
     
-    catalog["years"] = mp.newMap(34500,
+    catalog["years"] = mp.newMap(10000,
                                  maptype="PROBING",
                                  loadfactor=0.5,
                                  comparefunction=compareMapyear)
+
+    catalog["techniques"] = mp.newMap(500,
+                                      maptype="CHAINING",
+                                      loadfactor= 0.5,
+                                      comparefunction=compareReps)
 
 
     return catalog
@@ -70,6 +78,7 @@ def addAuthor(id):
               "artworks": None}
     author["id"] = id
     author["artworks"] = lt.newList("SINGLE_LINKED", compareAuthorsByName)
+    
     return author
 
 def newinfo(catalog, authorinfo):
@@ -78,6 +87,7 @@ def newinfo(catalog, authorinfo):
 
 def addArtwork(catalog, artwork):
     lt.addLast(catalog["artworks"], artwork)
+    addArtworkyear(catalog, artwork)
     authors = artwork["ConstituentID"].split(",")
     for value in authors:
         author = value.strip("[").strip("]").strip(" ")
@@ -104,7 +114,7 @@ def addAuthorinfo(catalog, authorid):
     valor2 = me.getValue(entrada)
     valor.update(valor2)
     del valor["ConstituentID"]
-    mp.put(authors, authorid, valor)
+    mp.put(authors, valor["DisplayName"], valor)
  
 
 def addAuthoryear(catalog, author):
@@ -127,13 +137,87 @@ def addAuthoryear(catalog, author):
     except Exception:
         return None
 
+def addNationalityReps(catalog):
+
+    authors = catalog["authors"]
+    authors_info = catalog["authors_info"]
+    llaves = mp.keySet(authors)
+    len_llaves = lt.size(llaves)
+    nacionalidades = mp.newMap(20000, loadfactor=0.5, maptype="PROBING")
+    for i in range(1, len_llaves+1):
+        author_name = lt.getElement(llaves, i)
+        pos = mp.get(authors, author_name)
+        llave = me.getKey(pos)
+        author = mp.get(authors_info, llave)
+        if author:
+            valor = me.getValue(author)
+            exist = mp.contains(nacionalidades, valor["Nationality"])
+            if exist:
+                pareja = mp.get(nacionalidades, valor["Nationality"])
+                llave = me.getKey(pareja)
+                nuev_valor = int(me.getValue(pareja)) + 1
+                nuev_pareja = me.setValue(pareja, nuev_valor)
+                mp.remove(nacionalidades, llave)
+                mp.put(nacionalidades, llave, nuev_valor)
+            else:
+                mp.put(nacionalidades,valor["Nationality"], 1)
+
+    return nacionalidades
+
+def addTechniqueReps(catalog, authorname):
+    try:
+        
+        techniques = catalog["techniques"]
+        authors = catalog["authors"]
+        exists = mp.contains(authors, authorname)
+        if exists:
+            
+            entry = mp.get(authors, authorname)
+            info_author = me.getValue(entry)
+            for i in range(0, lt.size(info_author["artworks"])):
+                artwork = lt.getElement(info_author["artworks"], i)
+                artexist = mp.contains(techniques, artwork["Medium"])
+                
+                if artexist:
+                    entrada = mp.get(techniques, artwork["Medium"])
+                    llave = me.getKey(entrada)
+                    valor = me.getValue(entrada)
+                    valor["repetitions"] += 1
+                    lt.addLast(valor["artworks"], artwork)
+                    mp.remove(techniques, llave)
+                    mp.put(techniques, llave, valor)
+                else: 
+                    valor = newTechnique(artwork)
+                    mp.put(techniques, artwork["Medium"], valor)
+
+        ord_reps = lt.newList("SINGLE_LINKED", compareReps)
+        llaves = mp.keySet(techniques)
+        for i in range(1, lt.size(llaves)+1):
+
+            entry = mp.get(techniques, lt.getElement(llaves, i))
+            valor = me.getValue(entry)
+            nuv_par = me.setKey(entry, valor["repetitions"])
+            nuv_par = me.setValue(nuv_par, valor["artworks"])
+            lt.addLast(ord_reps, nuv_par)
+        return ord_reps
+    except Exception:
+        return None
+
+def newTechnique(artwork):
+    entry = {"technique": "", "artworks": None, "repetitions": 0}
+    entry["technique"] = artwork["Medium"]
+    entry["artworks"] = lt.newList("SINGLE_LINKED")
+    entry["repetitions"] = 1
+    lt.addFirst(entry["artworks"], artwork)
+    return entry
+
 def addArtworkyear(catalog, artwork):
     
     try:
         years = catalog['years']
-        if (artwork['BeginDate'] != ''):
-            pubyear = artwork['BeginDate']
-            pubyear = int(float(pubyear))
+        if (artwork['DateAcquired'] != ''):
+            pubyear = artwork['DateAcquired']
+            pubyear = datetime.strptime(pubyear, "%Y-%m-%d")
         else:
             pubyear = 2020
         existyear= mp.contains(years, pubyear)
@@ -144,6 +228,7 @@ def addArtworkyear(catalog, artwork):
             year = newYear(pubyear)
             mp.put(years, pubyear, year)
         lt.addLast(year["artworks"], artwork)
+
     except Exception:
         return None
 
@@ -157,6 +242,8 @@ def newYear(bornyear):
     
    
 # Funciones de consulta
+
+
 def artworksSize(catalog):
     """
     Número de libros en el catago
@@ -187,12 +274,21 @@ def getAuthorsByYear(catalog, start, end):
     return authors
 
 def getArtworkByYear(catalog, start, end):
+    cont = 0
     artworks = lt.newList()
-    rango = end -(start-1)
-    for i in range(0, rango):
-        year = mp.get(catalog["years"], start+i)
+    start = datetime.strptime((start).strip(" "), "%Y-%m-%d")
+    end = datetime.strptime(end.strip(" "), "%Y-%m-%d")  
+    date_generated = [start + timedelta(days=x) for x in range(0, (end-start).days)]
+    for i in range(0, len(date_generated)): 
+        year = mp.get(catalog["years"], date_generated[i])
         if year:
             elementos = me.getValue(year)["artworks"]
+            lt.addLast(artworks, elementos)
+    return artworks
+
+def getArtworkByNationality(catalog):
+    autores = catalog["authors"]
+    
 # Funciones utilizadas para comparar elementos dentro de una lista
 
 def compareAuthorsByName(keyname, author):
@@ -204,6 +300,16 @@ def compareAuthorsByName(keyname, author):
         return 1
     else:
         return -1
+
+def compareReps(reps, list):
+    tagentry = me.getKey(list)
+    if (reps == tagentry):
+        return 0
+    elif (reps > tagentry):
+        return 1
+    else: 
+        return -1
+    
 
 def compareMapyear(id, tag):
     tagentry = me.getKey(tag)
