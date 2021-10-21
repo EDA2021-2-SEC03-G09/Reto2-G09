@@ -137,7 +137,6 @@ def printArtworkstech(catalog, ord_obras):
     
 def printMostNationalities(catalog, listNations):
     nationalities = listNations
-
     llaves = mp.keySet(nationalities)
     values_size = lt.size(llaves)
     top = 0
@@ -165,9 +164,45 @@ def printMostNationalities(catalog, listNations):
         print("-"*50)
         top += 1
     print("-"*50)
+    NationArtworks(catalog, "American")
+    
 
+def NationArtworks(catalog, nation):
+    authors = catalog["authors"]
+    artworks = lt.newList()
+    keys = mp.keySet(authors)
+    mpsize = mp.size(keys)
+    for i in range(1, mpsize+1):
+        par = mp.get(authors, lt.getElement(keys, i))
+        valor = me.getValue(par)
+        nationality = valor["Nationality"]
+        if nationality != "":
+            if nationality == nation:
+                natartworks = {"Amount": lt.size(valor["artworks"]), "Artworks": valor["artworks"]}
+                lt.addLast(artworks, natartworks)
+    most = lt.removeFirst(sortNation(artworks))
+    obras = most["Artworks"]
 
+    print("Obras encontradas de nacionalidad: " + str(nation)+ "\n")
+    for j in range(1, 4):
+                    
+        
+        
+        authorid = lt.getElement(obras,j)["ConstituentID"].strip("[").strip("]")
+        for k in range(1, mpsize):
+            pareja = mp.get(authors, lt.getElement(keys, k))
+            valor = me.getValue(pareja)
 
+            if authorid == valor["id"]:
+                name = valor["DisplayName"]
+                
+                
+        print("-"*50)
+        print(lt.getElement(obras, j))
+        print("\n")
+        print("Por " + str(name))
+        print("-"*50) 
+                    
 
 
 def sortNation(list):
@@ -177,6 +212,8 @@ def sortNation(list):
         artwork = lt.getElement(list, i)
         if artwork["Amount"] > max:
             max = artwork["Amount"]
+    
+
     for i in range(1, list_size + 1):
         artwork = lt.getElement(list, i)
         if artwork["Amount"] == max:
