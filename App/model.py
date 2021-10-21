@@ -289,7 +289,7 @@ def moveArtworks(catalog, departamento):
                 costo = precio
             
             
-        info = {"Price": costo,"Weight": peso, "Date": obra["Date"], "info": obra}
+        info = {"Price": round(costo,2),"Weight": peso, "Date": obra["Date"], "info": obra}
 
         mp.put(departamentos, obra["Title"], info)
 

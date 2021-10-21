@@ -146,7 +146,6 @@ def printMostNationalities(catalog, listNations):
             actual = me.getValue(pareja)
             if actual > max:
                 max = actual
-                
     values = mp.valueSet(nationalities)
     for j in range(1, values_size):
         print(lt.size(values))
@@ -157,25 +156,85 @@ def printMostNationalities(catalog, listNations):
             entry = me.setKey(entry, nation)
             lt.addLast(topnations, entry)
             mp.remove(nationalities, nation)
-    print(topnations)
+    print(topnations)            
+
+
 
 
 def printmoveArtworks(catalog, artworks):
+    list = lt.newList("SINGLE_LINKED")
     llaves = mp.keySet(artworks)
     llaves_size = mp.size(llaves)
     peso = 0.0
     precio = 0
     for i in range(1, llaves_size+1):
+        
         par = mp.get(artworks, lt.getElement(llaves, i))
         price = (me.getValue(par))["Price"] 
         value = (me.getValue(par))["info"]
         if value["Weight (kg)"] != "":
             peso += float(value["Weight (kg)"])
+        year = (me.getValue(par))["Date"]
         precio += float(price)
-    
+        lt.addLast(list, me.getValue(par))
     print("Se encontraron " + str(llaves_size) + " obras" + "\n")
     print("El peso total aproximado es de " + str(peso) + " kg\n")
     print("El precio total aproximado es de " + str(round(precio,2)) + " USD\n")
+    print("Obras más costosas de transportar\n")
+    list_2 = list
+    print(lt.firstElement(sortPrice(list)))
+    print("-"*50)
+    top = 0
+    while top < 5:
+
+        lt.removeFirst(list)
+        print(lt.firstElement(sortPrice(list)))
+        print("-"*50)
+        top += 1
+    print("-"*50)
+    print("Obras más antiguas a transportar\n")
+    print(lt.firstElement(sortYear(list_2)))
+    print("-"*50)
+    bot = 0 
+    while bot < 5:
+        lt.removeFirst(list_2)
+        print(lt.firstElement(sortYear(list_2)))
+        print("-"*50)
+        bot += 1
+    print("-"*50)
+    
+
+
+def sortPrice(list):
+    max = 0
+    list_size = lt.size(list)
+    for i in range(1, list_size + 1):
+        artwork = lt.getElement(list, i)
+        if artwork["Price"] > max:
+            max = artwork["Price"]
+    for i in range(1, list_size + 1):
+        artwork = lt.getElement(list, i)
+        if artwork["Price"] == max:
+        
+            lt.exchange(list,1, i)
+    return list
+
+def sortYear(list):
+    min = 2020
+    list_size = lt.size(list)
+    for i in range(1, list_size + 1):
+        artwork = lt.getElement(list, i)
+        if int(artwork["Date"]) < min:
+            min = int(artwork["Date"])
+    for i in range(1, list_size + 1):
+        artwork = lt.getElement(list, i)
+        if int(artwork["Date"]) == min:
+        
+            lt.exchange(list,1, i)
+    return list
+
+    
+    
 
     
                 
