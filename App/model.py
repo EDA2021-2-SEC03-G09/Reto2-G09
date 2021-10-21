@@ -65,6 +65,10 @@ def newCatalog():
                                       maptype="CHAINING",
                                       loadfactor= 0.5,
                                       comparefunction=compareReps)
+    
+    catalog["departments"] = mp.newMap(100,
+                                       maptype="PROBING",
+                                       loadfactor=0.5)
 
 
     return catalog
@@ -211,6 +215,8 @@ def newTechnique(artwork):
     lt.addFirst(entry["artworks"], artwork)
     return entry
 
+
+
 def addArtworkyear(catalog, artwork):
     
     try:
@@ -239,8 +245,57 @@ def newYear(bornyear):
     entry["artworks"] = lt.newList("SINGLE_LINKED", compareYears)
     return entry
 
+def moveArtworks(catalog, departamento):
+
+    departamentos = catalog["departments"]
+    total_obras = lt.newList("SINGLE_LINKED")
+    artworks = catalog["artworks"]
+    size_artworks = lt.size(artworks)
+    for i in range(1, size_artworks+1):
+        artwork = lt.getElement(artworks, i)
+        if artwork["Department"] == departamento:
+            lt.addLast(total_obras, artwork)
+
+    peso = 0
+        
+    size_dep = lt.size(total_obras)
+    for j in range(1, size_dep+1):
+        costo = 48
+        obra = lt.getElement(total_obras, j)
+        if (obra["Weight (kg)"] != ""):
+            costo = 72* float(obra["Weight (kg)"])
+            peso += float(obra["Weight (kg)"])
+            
+        if (obra["Length (cm)"] != "") and (obra["Height (cm)"] != "") and (obra["Width (cm)"]):
+            precio = (float(obra["Length (cm)"]) * float(obra["Height (cm)"]) * float(obra["Width (cm)"]))*0.000072
+            if costo < precio:
+                costo = precio
+            
+        if (obra["Length (cm)"] != "") and (obra["Height (cm)"] != ""):
+            precio = (float(obra["Length (cm)"]) * float(obra["Height (cm)"]))*0.0072
+            if costo < precio:
+                costo = precio
+           
+            
+        if (obra["Height (cm)"] != "") and (obra["Width (cm)"]):
+            precio = (float(obra["Height (cm)"]) * float(obra["Width (cm)"]))*0.0072
+            if costo < precio:
+                costo = precio
+           
+
+        if (obra["Length (cm)"] != "") and (obra["Width (cm)"]):
+            precio = (float(obra["Length (cm)"]) * float(obra["Width (cm)"]))*0.0072
+            if costo < precio:
+                costo = precio
+            
+            
+        info = {"Price": costo,"Weight": peso, "Date": obra["Date"], "info": obra}
+
+        mp.put(departamentos, obra["Title"], info)
+
+    return(departamentos)
     
-   
+        
 # Funciones de consulta
 
 

@@ -158,11 +158,26 @@ def printMostNationalities(catalog, listNations):
             lt.addLast(topnations, entry)
             mp.remove(nationalities, nation)
     print(topnations)
-    
 
-    return topnations
+
+def printmoveArtworks(catalog, artworks):
+    llaves = mp.keySet(artworks)
+    llaves_size = mp.size(llaves)
+    peso = 0.0
+    precio = 0
+    for i in range(1, llaves_size+1):
+        par = mp.get(artworks, lt.getElement(llaves, i))
+        price = (me.getValue(par))["Price"] 
+        value = (me.getValue(par))["info"]
+        if value["Weight (kg)"] != "":
+            peso += float(value["Weight (kg)"])
+        precio += float(price)
     
-            
+    print("Se encontraron " + str(llaves_size) + " obras" + "\n")
+    print("El peso total aproximado es de " + str(peso) + " kg\n")
+    print("El precio total aproximado es de " + str(round(precio,2)) + " USD\n")
+
+    
                 
         
     
@@ -179,6 +194,8 @@ def printMenu():
     print("2- Buscar autores en un rango de fechas")
     print("3- Buscar obras adquiridas en un rango de fechas")
     print("4- Buscar tecnicas de un autor")
+    print("5- Buscar Top nacionalidades")
+    print("6- Transportar obras de un departamento")
 
 def initCatalog():
     return controller.initCatalog
@@ -225,9 +242,12 @@ while True:
 
     elif int(inputs[0]) == 5:
         artworks = controller.addNationalityReps(cont)
-        print(printMostNationalities(cont, artworks))
+        printMostNationalities(cont, artworks)
 
-        
+    elif int(inputs[0]) == 6:
+        departamento = input("De qué departamento desea transportar obras?: \n")
+        artworks = controller.moveArtworks(cont, departamento)
+        printmoveArtworks(cont,artworks)
     else:
         sys.exit(0)
 sys.exit(0)

@@ -89,3 +89,7 @@ def ArtworkstechByAuthor(catalog, authorname):
 def addNationalityReps(catalog):
     nationalities = model.addNationalityReps(catalog)
     return nationalities
+
+def moveArtworks(catalog, departamento):
+    artworks = model.moveArtworks(catalog, departamento)
+    return artworks
