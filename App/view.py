@@ -119,15 +119,21 @@ def printArtworkstech(catalog, ord_obras):
                 entry = lt.getElement(valor, j)
                 lt.addLast(list_max, entry)
     print("\n")
-    print("Total de obras encontradas: " + str(tamano) + "\n")
-    print("Técnica más utilizada: " + (lt.firstElement(list_max))["Medium"] + " con " + str(lt.size(list_max)) + " obras")
-    primeros = 0
-    while primeros < max:
+    if not lt.isEmpty(list_max):
+        print("Total de obras encontradas: " + str(tamano) + "\n")
+        print("Técnica más utilizada: " + (lt.firstElement(list_max))["Medium"] + " con " + str(lt.size(list_max)) + " obras")
+        primeros = 0
         print("-"*100)
-        print(lt.firstElement(list_max))
+        while primeros < max:
+            print("-"*100)
+            print(lt.firstElement(list_max))
+            
+            lt.removeFirst(list_max)
+            primeros += 1
         print("-"*100)
-        lt.removeFirst(list_max)
-        primeros += 1
+        print("-"*100)
+    else:
+        print("El autor no ha sido encontrado\n")
     
 def printMostNationalities(catalog, listNations):
     nationalities = listNations
@@ -144,20 +150,43 @@ def printMostNationalities(catalog, listNations):
             pareja = mp.get(nationalities, lt.getElement(llaves, i))
             llave = me.getKey(pareja)
             actual = me.getValue(pareja)
-            if actual > max:
-                max = actual
-    values = mp.valueSet(nationalities)
-    for j in range(1, values_size):
-        print(lt.size(values))
-        if lt.getElement(values, j) == max:
-            
-            nation = lt.getElement(llaves, j)
-            entry = me.setValue(pareja, max)
-            entry = me.setKey(entry, nation)
+            entry = {"Nationality": llave, "Amount": actual}
             lt.addLast(topnations, entry)
-            mp.remove(nationalities, nation)
-    print(topnations)            
+    print("\n")
+    print("Top 10 nacionalidades\n")
+    print("-"*50)
+    print("-"*50)
+    print(lt.firstElement(sortNation(topnations)))
+    print("-"*50)
+    top = 0
+    while top < 10:
+        lt.removeFirst(topnations)
+        print(lt.firstElement(sortNation(topnations)))
+        print("-"*50)
+        top += 1
+    print("-"*50)
 
+
+
+
+
+def sortNation(list):
+    max = 0
+    list_size = lt.size(list)
+    for i in range(1, list_size + 1):
+        artwork = lt.getElement(list, i)
+        if artwork["Amount"] > max:
+            max = artwork["Amount"]
+    for i in range(1, list_size + 1):
+        artwork = lt.getElement(list, i)
+        if artwork["Amount"] == max:
+        
+            lt.exchange(list,1, i)
+    return list      
+  
+   
+
+    
 
 
 
@@ -224,13 +253,14 @@ def sortYear(list):
     list_size = lt.size(list)
     for i in range(1, list_size + 1):
         artwork = lt.getElement(list, i)
-        if int(artwork["Date"]) < min:
-            min = int(artwork["Date"])
+        if artwork["Date"] != "":
+            if int(artwork["Date"]) < min:
+             min = int(artwork["Date"])
     for i in range(1, list_size + 1):
         artwork = lt.getElement(list, i)
-        if int(artwork["Date"]) == min:
-        
-            lt.exchange(list,1, i)
+        if artwork["Date"] != "":
+            if int(artwork["Date"]) == min:
+                lt.exchange(list,1, i)
     return list
 
     
@@ -255,7 +285,7 @@ def printMenu():
     print("4- Buscar tecnicas de un autor")
     print("5- Buscar Top nacionalidades")
     print("6- Transportar obras de un departamento")
-
+    print("7- Salir")
 def initCatalog():
     return controller.initCatalog
 
@@ -307,6 +337,6 @@ while True:
         departamento = input("De qué departamento desea transportar obras?: \n")
         artworks = controller.moveArtworks(cont, departamento)
         printmoveArtworks(cont,artworks)
-    else:
+    elif int(inputs[0]) == 7:
         sys.exit(0)
 sys.exit(0)

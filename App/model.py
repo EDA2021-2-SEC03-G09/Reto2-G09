@@ -147,7 +147,7 @@ def addNationalityReps(catalog):
     authors_info = catalog["authors_info"]
     llaves = mp.keySet(authors)
     len_llaves = lt.size(llaves)
-    nacionalidades = mp.newMap(20000, loadfactor=0.5, maptype="PROBING")
+    nacionalidades = mp.newMap(800, loadfactor=0.5, maptype="PROBING")
     for i in range(1, len_llaves+1):
         author_name = lt.getElement(llaves, i)
         pos = mp.get(authors, author_name)
